@@ -1,0 +1,23 @@
+<div class="pay-box-cover">
+
+<div class="pay-box">
+    <h2 class="page-header text-center">Pay <span class="user-name-pay"> {{user.name}} </span>with crypto</h2>
+    <p class="text-center">Copy following address and paste it into your related cryptocurrency wallet to send money.</p>
+
+    <div class="container">
+
+             {{#if user.userAddress.dai}}
+        <div class="input-group mb-4">
+            <label for="coin" class="col-sm-3 col-form-label">Dai: </label>
+            <div id="dai" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon2">{{user.userAddress.dai}}</div>
+            <div class="input-group-append">
+                <button class="btn" onclick="copyToClipboard('#dai')" type="button"><img src="copy.png" alt="Kiwi standing on oval"></button>
+            </div>
+        </div>
+      {{/if}}
+
+      
+    </div>
+</div>
+</div>
+      <p class="mt-5 mb-3 text-muted text-center">© 2018</p>
