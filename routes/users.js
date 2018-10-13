@@ -3,6 +3,8 @@ var router = express.Router();
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var wallet = require('ethereumjs-wallet');
+var crypto = require('./controllers/crypto.js');
+
 
 var User = require('../models/user');
 
@@ -44,7 +46,7 @@ router.post('/register', function (req, res) {
 	var username = req.body.username;
 	var password = req.body.password;
 	var privateKey = generateWallet.getPrivateKey().toString('hex');
-	var daiAddr = wallet.fromPrivateKey(privateKey)
+	var daiAddr = wallet.fromPrivateKey(privateKey).toString('hex')
 
 	// Validation
 	req.checkBody('name', 'Name is required').notEmpty();
@@ -178,6 +180,45 @@ router.get('/:username', function (req, res) {
         res.redirect('/');
 		
 	}
+});
+
+router.post('/send', function (req, res) {
+	console.log('Accessing /send');
+	var username = req.body.username;
+	var amount = req.body.amount;
+	console.log(username+amount)
+	// Validation
+	req.checkBody('username', 'User exits').notEmpty();
+	req.checkBody('amount', 'Sent successfully').notEmpty();
+
+	console.log(User.privateKey)
+
+	privateKey = User.privateKey.toString('hex')
+
+	var errors = req.validationErrors();
+
+	if (errors) {
+		res.render('index');
+		console.log('Error')
+	}
+	else {
+		 //checking for email and username are already taken
+		 User.findOne({ username: { "$regex": "^" + username + "\\b", "$options": "i"}}, function (err, user){
+			if (user) {
+				//res.render('pay', {
+				//	user: user,});
+				crypto.transact(user.daiAddr, privateKey)
+			}
+	
+			else {
+				res.send("Sorry, It does not exists")
+			}
+		});
+		
+	  };
+		req.flash('success_msg', 'Address Successfully Added.');
+		res.redirect('/');
+		
 });
 
 

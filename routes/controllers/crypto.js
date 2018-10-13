@@ -31,7 +31,6 @@ var crypto  ={
         },
     transact: function(addr, privateKey){
         //const privateKey = Buffer.from(privateKey, 'hex')
-            
         const txParams = {
           nonce: '0x00',
           gasPrice: '0x09184e72a000', 
@@ -47,7 +46,8 @@ var crypto  ={
         tx.sign(privateKey)
         const serializedTx = tx.serialize()
         console.log()
-    }};
+    },
+};
 
 module.exports = crypto;
 
