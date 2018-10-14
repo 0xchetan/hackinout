@@ -298,8 +298,15 @@ router.post('/pay', function (req, res) {
 				console.log(amount);
 				console.log(privateKey);
 				crypto.transact(addr,privateKey,amount);
+				var query = { username: req.user.username };
+				console.log(req.user.username)
+				User.findOneAndUpdate(query, {
+					'createdRequests.transactionStatus': true
+				} , {upsert: true, new:true}, function(err, doc){
+				if (err) return res.status(500).send(err);});
+				req.flash('success_msg', 'Transaction Added to the blockchain');
 			}
-	req.flash('success_msg', 'Removed');
+
 	res.redirect('/');	
 });
 });
