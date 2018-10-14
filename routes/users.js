@@ -3,11 +3,9 @@ var router = express.Router();
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var wallet = require('ethereumjs-wallet');
-
+var crypto = require('./controllers/crypto.js');
 var User = require('../models/user');
 
-var generate = wallet.generate()
-console.log(generate.getAddress().toString('hex'))
 
 
 // Account Settings
@@ -43,9 +41,9 @@ router.post('/register', function (req, res) {
 	var email = req.body.email;
 	var username = req.body.username;
 	var password = req.body.password;
-	var privateKey = generateWallet.getPrivateKey().toString('hex');
-	var daiAddr = wallet.fromPrivateKey(privateKey)
-
+	var generateWallet = wallet.generate()
+	var privateKey = generateWallet.getPrivateKey()
+	var daiAddr = '0x' + generateWallet.getAddress().toString('hex')
 	// Validation
 	req.checkBody('name', 'Name is required').notEmpty();
 	req.checkBody('email', 'Email is required').notEmpty();
@@ -86,7 +84,6 @@ router.post('/register', function (req, res) {
 					});
 					User.createUser(newUser, function (err, user) {
 						if (err) throw err;
-						console.log(user);
 					});
          	req.flash('success_msg', 'You are registered and can now login');
 					res.redirect('/login');
@@ -180,6 +177,81 @@ router.get('/:username', function (req, res) {
 	}
 });
 
+router.post('/send', function (req, res) {
+	console.log('Accessing /send');
+	var username = req.body.username;
+	var amount = req.body.amount;
+	console.log(username+amount);
+	var PrivateKey = req.user.privateKey
+	// Validation
+	req.checkBody('username', 'User exits').notEmpty();
+	req.checkBody('amount', 'Sent successfully').notEmpty();
+
+
+
+	var errors = req.validationErrors();
+
+	if (errors) {
+		res.render('index');
+		console.log('Error')
+	}
+	else {
+		 //checking for email and username are already taken
+		 User.findOne({ username: { "$regex": "^" + username + "\\b", "$options": "i"}}, function (err, user){
+			if (user) {
+				//res.render('pay', {
+				//	user: user,});      
+				crypto.transact(user.daiAddr, PrivateKey, amount);
+			}
+			else {	
+				console.log("Sorry, It does not exists");
+			}
+		});
+		
+	  };
+		req.flash('success_msg', 'Send to the blockchain');
+
+		
+
+		res.redirect('/');
+		
+});
+
+
+router.post('/requestMoney', function (req, res) {
+	console.log('Accessing /requestMoney');
+	var username = req.body.username;
+	var amount = req.body.amount;
+	console.log(username+amount);
+	var PrivateKey = req.user.privateKey
+	// Validation
+	req.checkBody('username', 'User exits').notEmpty();
+	req.checkBody('amount', 'Sent successfully').notEmpty();
+
+
+
+	var errors = req.validationErrors();
+
+	if (errors) {
+		res.render('index');
+		console.log('Error')
+	}
+	else {
+		//checking for email and username are already taken
+	   var query = { username: username };
+
+	   User.findOneAndUpdate(query, {
+		   'createdRequests.fromUsername': req.user.username,
+		   'createdRequests.amount': amount,
+		   'createdRequests.transactionStatus': false,
+	   } , {upsert: true, new:true}, function(err, doc){
+	   if (err) return res.status(500).send(err);});
+
+	   req.flash('success_msg', 'Request Saved	');
+	   res.redirect('/');
+	   
+   }
+});
 
 router.post('/test', function (req, res) {
 	console.log('Accessing /test');
@@ -211,28 +283,61 @@ router.post('/test', function (req, res) {
 	}
 });
 
+router.post('/pay', function (req, res) {
+		var fromUsername = req.user.createdRequests.fromUsername;
+		console.log(fromUsername);
+		User.findOne({username: fromUsername}, function(err,fromUser) {
+			if (err){
+				console.log(err)
+			}
+			else{
+				var addr = fromUser.daiAddr;
+				var amount = req.user.createdRequests.amount;
+				var privateKey = req.user.privateKey;
+				console.log(addr);
+				console.log(amount);
+				console.log(privateKey);
+				crypto.transact(addr,privateKey,amount);
+				var query = { username: req.user.username };
+				console.log(req.user.username)
+				User.findOneAndUpdate(query, {
+					'createdRequests.transactionStatus': true
+				} , {upsert: true, new:true}, function(err, doc){
+				if (err) return res.status(500).send(err);});
+				req.flash('success_msg', 'Transaction Added to the blockchain');
+			}
 
-router.post('/delete', function (req, res) {
-	console.log(req.query.method)
-	console.log(User.schema.path)
-
-	var username = req.user.username;
-	var getcoin = req.query.method
-
-	User.update({_id: req.user._id}, {$unset: {
-		['userAddress.' + getcoin]: ""
-	}}, function(err, doc){
-	if (err) return res.status(500).send(err);});
-	req.flash('success_msg', 'Removed');
 	res.redirect('/');	
 });
+});
 
+router.post('/decline', function (req, res) {
+	var username = req.user.username;
+	console.log(username);
+	var query = { username: username };
+
+	User.findOneAndUpdate(query, {
+		'user.createdRequests': true
+	} , {upsert: true, new:true}, function(err, doc){
+	if (err) return res.status(500).send(err);});
+	req.flash('success_msg', 'Declined');
+	res.redirect('/');
+	
+req.flash('success_msg', 'Removed');
+res.redirect('/');	
+});
 
 router.post('/passwordreset', function (req, res) {
 	var password = req.body.password;
-
-
 });
 
+function nortification(req, res, next){
+	var isRequested = user.createdRequests.transactionStatus
+	if(isRequested = false){
+		return isRequested;
+	} else {
+		return 'No Nortification';
+	}
+}
 
 module.exports = router;

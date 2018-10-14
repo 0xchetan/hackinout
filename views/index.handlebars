@@ -1,29 +1,66 @@
  <h2 class="page-header text-center">Dashboard</h2>
 <p class="text-center">Welcome to your dashboard, <b>{{user.name}}</b>.</p>
 
-<p class="text-center">Wallet Balance: <b>{{user.daiAddr}}</b>.</p>  
 
+{{balance}}
+
+          {{#if isFalse}}
+
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="padding:2em">
+
+ <form method = "post">
+   <div class="form-group">
+  <b> {{user.createdRequests.fromUsername}}</b> requested {{user.createdRequests.amount}} Dai from you.
+
+  <div class=" float-right">
+    <button type="submit" class="btn btn-success" aria-label="Close" formaction="/pay">
+      <span aria-hidden="true">Pay</span>
+  </button>
+  
+  <button type="submit" class="btn btn-danger" aria-label="Close" formaction="/decline">
+    <span aria-hidden="true">Discard</span>
+  </button>
+  </div> 
+  </div>
+</form>
+
+</div>
+          {{/if}}
 
 <div class="container">
+  
+  <div class="row">
 
-<form method="post" action="/test">
-<div class="form-group mb-4">
-  <div class="input-group-append">
-    <button class="btn btn-primary" type="submit">Receive</button>
+    <div class="col">
+
+  <form method="post" action="/send">
+<h2>
+  Send Money
+</h2>
+  <div class="form-group">
+    <input type="text" class="form-control" name="username" placeholder="username you want to send money to"> <br>
+    <input type="text" class="form-control" name="amount" placeholder="amount in Dai">
+  </div>
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Send Now</button>
+</form>
+</div>
+
+    <div class="col">
+
+
+<form method="post" action="/requestMoney">
+<h2>
+  Request Money
+</h2>
+  <div class="form-group">
+    <input type="text" class="form-control" name="username" placeholder="username you want to send money to"> <br>
+    <input type="text" class="form-control" name="amount" placeholder="amount in Dai">
+  </div>
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Request Now</button>
+</form>
+</div>
   </div>
 
-  Account Balance is : {{balance}}
-  
-</div>
-</form>
+<p class="mt-5 mb-3 text-muted text-center">Your Wallet Address: <b>{{user.daiAddr}}</b>.(<a href="https://kovan.etherscan.io/address/{{user.daiAddr}}">View on Etherscan</a>)</p>  
 
-<form method="post" action="/test">
-<div class="form-group mb-4">
-  <div class="input-group-append">
-    <button class="btn btn-primary" type="submit">Send</button>
-  </div>
-  
-</div>
-</form>
-
-  </table>
+<p class="mt-5 mb-3 text-muted text-center">© 2018</p>
