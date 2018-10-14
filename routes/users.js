@@ -4,12 +4,8 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var wallet = require('ethereumjs-wallet');
 var crypto = require('./controllers/crypto.js');
-
-
 var User = require('../models/user');
 
-var generate = wallet.generate()
-console.log(generate.getAddress().toString('hex'))
 
 
 // Account Settings
@@ -45,9 +41,9 @@ router.post('/register', function (req, res) {
 	var email = req.body.email;
 	var username = req.body.username;
 	var password = req.body.password;
-	var privateKey = generateWallet.getPrivateKey().toString('hex');
-	var daiAddr = wallet.fromPrivateKey(privateKey).toString('hex')
-
+	var generateWallet = wallet.generate()
+	var privateKey = generateWallet.getPrivateKey()
+	var daiAddr = '0x' + generateWallet.getAddress().toString('hex')
 	// Validation
 	req.checkBody('name', 'Name is required').notEmpty();
 	req.checkBody('email', 'Email is required').notEmpty();
@@ -88,7 +84,6 @@ router.post('/register', function (req, res) {
 					});
 					User.createUser(newUser, function (err, user) {
 						if (err) throw err;
-						console.log(user);
 					});
          	req.flash('success_msg', 'You are registered and can now login');
 					res.redirect('/login');
@@ -186,14 +181,13 @@ router.post('/send', function (req, res) {
 	console.log('Accessing /send');
 	var username = req.body.username;
 	var amount = req.body.amount;
-	console.log(username+amount)
+	console.log(username+amount);
+	var PrivateKey = req.user.privateKey
 	// Validation
 	req.checkBody('username', 'User exits').notEmpty();
 	req.checkBody('amount', 'Sent successfully').notEmpty();
 
-	console.log(User.privateKey)
 
-	privateKey = User.privateKey.toString('hex')
 
 	var errors = req.validationErrors();
 
@@ -206,17 +200,19 @@ router.post('/send', function (req, res) {
 		 User.findOne({ username: { "$regex": "^" + username + "\\b", "$options": "i"}}, function (err, user){
 			if (user) {
 				//res.render('pay', {
-				//	user: user,});
-				crypto.transact(user.daiAddr, privateKey)
+				//	user: user,});      
+				crypto.transact(user.daiAddr, PrivateKey, amount);
 			}
-	
-			else {
-				res.send("Sorry, It does not exists")
+			else {	
+				console.log("Sorry, It does not exists");
 			}
 		});
 		
 	  };
-		req.flash('success_msg', 'Address Successfully Added.');
+		req.flash('success_msg', 'Send to the blockchain');
+
+		
+
 		res.redirect('/');
 		
 });

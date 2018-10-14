@@ -21,7 +21,7 @@ var UserSchema = mongoose.Schema({
 		type: String
 	},
 	privateKey:{
-		type: String
+		type: Buffer
 	}
 });
 

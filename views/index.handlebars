@@ -1,21 +1,13 @@
  <h2 class="page-header text-center">Dashboard</h2>
 <p class="text-center">Welcome to your dashboard, <b>{{user.name}}</b>.</p>
 
-<p class="text-center">Wallet Balance: <b>{{user.daiAddr}}</b>.</p>  
 
 
 <div class="container">
-
-<form method="post" action="/test">
-<div class="form-group mb-4">
-  <div class="input-group-append">
-    <button class="btn btn-primary" type="submit">Receive</button>
-  </div>
-
-  Account Balance is : {{balance}}
   
-</div>
-</form>
+  <div class="row">
+
+    <div class="col">
 
 <form method="post" action="/send">
 <h2>
@@ -23,10 +15,28 @@
 </h2>
   <div class="form-group">
     <input type="text" class="form-control" name="username" placeholder="username you want to send money to"> <br>
-    <input type="text" class="form-control" name="amount" placeholder="amount">
+    <input type="text" class="form-control" name="amount" placeholder="amount in Dai">
   </div>
-      <button class="btn btn-lg btn-primary btn-block" type="submit">Reset Password</button>
-      <p class="mt-5 mb-3 text-muted text-center">© 2018</p>
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Send Now</button>
 </form>
+</div>
 
-  </table>
+    <div class="col">
+
+
+<form method="post" action="/requestMoney">
+<h2>
+  Request Money
+</h2>
+  <div class="form-group">
+    <input type="text" class="form-control" name="username" placeholder="username you want to send money to"> <br>
+    <input type="text" class="form-control" name="amount" placeholder="amount in Dai">
+  </div>
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Request Now</button>
+</form>
+</div>
+  </div>
+
+<p class="mt-5 mb-3 text-muted text-center">Your Wallet Address: <b>{{user.daiAddr}}</b>.(<a href="https://kovan.etherscan.io/address/{{user.daiAddr}}">View on Etherscan</a>)</p>  
+
+          <p class="mt-5 mb-3 text-muted text-center">© 2018</p>
