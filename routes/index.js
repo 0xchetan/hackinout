@@ -5,8 +5,25 @@ var crypto = require('./controllers/crypto.js');
 
 // Get Homepage
 router.get('/', ensureAuthenticated, function(req, res){
-	var balance = crypto.daiBalance('0xaeec6f5aca72f3a005af1b3420ab8c8c7009bac8')
-	res.render('index',{balance: balance})
+	try {
+		var transactionStatus = req.user.createdRequests.transactionStatus
+
+		function isFalse(){
+			if (transactionStatus == false){
+				return true
+			}
+			else{
+				return false
+			}
+		}
+
+		res.render('index',{
+			isFalse: isFalse()
+		})
+	}
+	catch(err) {
+		res.render('index')
+	}
 });
 
 router.get('/account', ensureAuthenticated, function(req, res){

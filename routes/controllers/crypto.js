@@ -52,7 +52,7 @@ var crypto  ={
         tx.sign(privateKeytoHex)
         console.log(tx.hash().toString('hex'))
         const serializedTx = tx.serialize()
-        return web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
+        web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
 
     },
 };

@@ -218,6 +218,41 @@ router.post('/send', function (req, res) {
 });
 
 
+router.post('/requestMoney', function (req, res) {
+	console.log('Accessing /requestMoney');
+	var username = req.body.username;
+	var amount = req.body.amount;
+	console.log(username+amount);
+	var PrivateKey = req.user.privateKey
+	// Validation
+	req.checkBody('username', 'User exits').notEmpty();
+	req.checkBody('amount', 'Sent successfully').notEmpty();
+
+
+
+	var errors = req.validationErrors();
+
+	if (errors) {
+		res.render('index');
+		console.log('Error')
+	}
+	else {
+		//checking for email and username are already taken
+	   var query = { username: username };
+
+	   User.findOneAndUpdate(query, {
+		   'createdRequests.fromUsername': req.user.username,
+		   'createdRequests.amount': amount,
+		   'createdRequests.transactionStatus': false,
+	   } , {upsert: true, new:true}, function(err, doc){
+	   if (err) return res.status(500).send(err);});
+
+	   req.flash('success_msg', 'Request Saved	');
+	   res.redirect('/');
+	   
+   }
+});
+
 router.post('/test', function (req, res) {
 	console.log('Accessing /test');
 	var address = req.body.address;
@@ -248,28 +283,54 @@ router.post('/test', function (req, res) {
 	}
 });
 
-
-router.post('/delete', function (req, res) {
-	console.log(req.query.method)
-	console.log(User.schema.path)
-
-	var username = req.user.username;
-	var getcoin = req.query.method
-
-	User.update({_id: req.user._id}, {$unset: {
-		['userAddress.' + getcoin]: ""
-	}}, function(err, doc){
-	if (err) return res.status(500).send(err);});
+router.post('/pay', function (req, res) {
+		var fromUsername = req.user.createdRequests.fromUsername;
+		console.log(fromUsername);
+		User.findOne({username: fromUsername}, function(err,fromUser) {
+			if (err){
+				console.log(err)
+			}
+			else{
+				var addr = fromUser.daiAddr;
+				var amount = req.user.createdRequests.amount;
+				var privateKey = req.user.privateKey;
+				console.log(addr);
+				console.log(amount);
+				console.log(privateKey);
+				crypto.transact(addr,privateKey,amount);
+			}
 	req.flash('success_msg', 'Removed');
 	res.redirect('/');	
 });
+});
 
+router.post('/decline', function (req, res) {
+	var username = req.user.username;
+	console.log(username);
+	var query = { username: username };
+
+	User.findOneAndUpdate(query, {
+		'user.createdRequests': true
+	} , {upsert: true, new:true}, function(err, doc){
+	if (err) return res.status(500).send(err);});
+	req.flash('success_msg', 'Declined');
+	res.redirect('/');
+	
+req.flash('success_msg', 'Removed');
+res.redirect('/');	
+});
 
 router.post('/passwordreset', function (req, res) {
 	var password = req.body.password;
-
-
 });
 
+function nortification(req, res, next){
+	var isRequested = user.createdRequests.transactionStatus
+	if(isRequested = false){
+		return isRequested;
+	} else {
+		return 'No Nortification';
+	}
+}
 
 module.exports = router;

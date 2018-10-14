@@ -2,6 +2,30 @@
 <p class="text-center">Welcome to your dashboard, <b>{{user.name}}</b>.</p>
 
 
+{{balance}}
+
+          {{#if isFalse}}
+
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="padding:2em">
+
+ <form method = "post">
+   <div class="form-group">
+  <b> {{user.createdRequests.fromUsername}}</b> requested {{user.createdRequests.amount}} Dai from you.
+
+  <div class=" float-right">
+    <button type="submit" class="btn btn-success" aria-label="Close" formaction="/pay">
+      <span aria-hidden="true">Pay</span>
+  </button>
+  
+  <button type="submit" class="btn btn-danger" aria-label="Close" formaction="/decline">
+    <span aria-hidden="true">Discard</span>
+  </button>
+  </div> 
+  </div>
+</form>
+
+</div>
+          {{/if}}
 
 <div class="container">
   
@@ -9,7 +33,7 @@
 
     <div class="col">
 
-<form method="post" action="/send">
+  <form method="post" action="/send">
 <h2>
   Send Money
 </h2>
@@ -39,4 +63,4 @@
 
 <p class="mt-5 mb-3 text-muted text-center">Your Wallet Address: <b>{{user.daiAddr}}</b>.(<a href="https://kovan.etherscan.io/address/{{user.daiAddr}}">View on Etherscan</a>)</p>  
 
-          <p class="mt-5 mb-3 text-muted text-center">© 2018</p>
+<p class="mt-5 mb-3 text-muted text-center">© 2018</p>
